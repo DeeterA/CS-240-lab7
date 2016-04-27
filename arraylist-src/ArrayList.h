@@ -109,7 +109,13 @@ ArrayList<T>::ArrayList() :
  */
 template<class T>
 ArrayList<T>::ArrayList(const ArrayList<T>& other) {
-    
+	m_size = other -> m_size;
+	m_capacity = other -> m_capacity;
+	pElements = new T[m_capacity];
+
+	for(int i = 0; i < m_capacity; i++) {
+		*pElements[i] = other -> pElements[i];
+	}
 }
 
 /**
@@ -135,7 +141,13 @@ ArrayList<T>::~ArrayList() {
  */
 template<class T>
 void ArrayList<T>::clear() {
-    /** @todo Clear the list and shrink the array. **/
+	for (int i = 0; i < m_size; i++) {
+		delete(&pElements[i]);
+	}
+
+	m_size = 0;
+	m_capacity = (SIZE_INCREMENT);
+	pElements = new T[SIZE_INCREMENT];
 }
 
 /**
@@ -150,7 +162,18 @@ void ArrayList<T>::clear() {
  */
 template<class T>
 void ArrayList<T>::add(const T& item) {
+	if (m_size == m_capacity) {
+		T *newP = new T[m_capacity * SIZE_INCREMENT];
+		for (int i = 0; i < m_size; i++) {
+			newP[i] = pElements[i];
+		}
 
+		newP[++m_size] = item;
+		pElements = newP;
+		m_capacity *= SIZE_INCREMENT;
+	} else {
+		pElements[m_size++] = item;
+	}
 }
 
 /**
@@ -164,7 +187,21 @@ void ArrayList<T>::add(const T& item) {
  */
 template<class T>
 void ArrayList<T>::add(const T& item, int index) {
+	if (index > m_capacity)
+		throw std::exception();
+	
+	if (index == m_capacity) {
+		T *newP = new T[m_capacity * SIZE_INCREMENT];
+		for (int i = 0; i < m_size; i++) {
+			newP[i] = pElements[i];
+		}
 
+		newP[++m_size] = item;
+		pElements = newP;
+		m_capacity *= SIZE_INCREMENT;
+	} else {
+		pElements[index] = item;
+	}
 }
 
 /**
@@ -177,8 +214,27 @@ void ArrayList<T>::add(const T& item, int index) {
  *      the ArrayList<T> if it is full
  */
 template<class T>
-void ArrayList<T>::push_back(const T& item) {
+void ArrayList<T>::push_front(const T& item) {
+	if ((m_size + 1) == m_capacity) {
+		T *newP = new T[m_capacity * SIZE_INCREMENT];
+		newP[0] = item;
+		for (int i = 1; i < m_size; i++) {
+			newP[i] = pElements[i];
+		}
 
+		m_size += 1;
+		m_capacity *= SIZE_INCREMENT;
+		pElements = newP;
+	} else {
+		T *newP = new T[m_capacity];
+		newP[0] = item;
+		for (int i = 1; i < m_size; i++) {
+			newP[i] = pElements[i];
+		}
+
+		m_size += 1;
+		pElements = newP;
+	}
 }
 
 /**
@@ -192,8 +248,8 @@ void ArrayList<T>::push_back(const T& item) {
  *      is needed
  */
 template<class T>
-void ArrayList<T>::push_front(const T& item) {
-
+void ArrayList<T>::push_back(const T& item) {
+	add(&item);
 }
 
 /**
@@ -207,11 +263,16 @@ void ArrayList<T>::push_front(const T& item) {
  */
 template<class T>
 const T ArrayList<T>::remove(int index) {
-    const T myT = T();
-    /**
-     * @todo Remove the item in the index-th
-     * index and return it.
-     */
+    const T myT = T(index);
+    
+    	pElements[index] = NULL;
+	
+	T *newP = new T[m_capacity];
+	for (int i = 0; i < --m_size; i++) {
+		if (pElements[i] != NULL) {
+			newP[i] = pElements[i];
+		}
+	}
     return myT;
 }
 
@@ -227,10 +288,26 @@ const T ArrayList<T>::remove(int index) {
  */
 template<class T>
 void ArrayList<T>::remove(const T & item, bool * ok) {
-    /**
-     * @todo Find and remove item within the array.
-     *  Upon successful removal, set ok to true unless ok is NULL
-     */
+	if (ok != NULL) {
+		ok = false;
+	}
+
+    	for (int i = 0; i < m_size; i++) {
+		if (pElements[i] == item) {
+			pElements[i] == NULL;
+			if (ok = false) {
+				ok = true;
+			}
+			break;
+		}
+	}
+
+	T *newP = new T[m_capacity];
+	for (int i = 0; i < --m_size; i++) {
+		if (pElements[i] != NULL) {
+			newP[i] = pElements[i];
+		}
+	}
 }
 
 /**
@@ -252,10 +329,11 @@ bool ArrayList<T>::isEmpty() {
  */
 template<class T>
 bool ArrayList<T>::contains(const T& item) {
-    /**
-     * @todo Return true if object is in the list.
-     */
-    return false;
+    	for (int i = 0; i < m_size; i++) {
+    		if (pElements[i] == item) {
+			return true;
+		}
+	} return false;
 }
 
 /**
@@ -267,12 +345,11 @@ bool ArrayList<T>::contains(const T& item) {
  */
 template<class T>
 int ArrayList<T>::indexOf(const T& item) {
-    /**
-     * @todo Find the index of item in the ArrayList<T>,
-     * or return -1 if not found.
-     */
-
-    return -1;
+	for (int i = 0; i < m_size; i++) {
+		if (pElements[i] == item) {
+			return i;
+		}
+	} return -1;
 }
 
 /**
@@ -285,11 +362,15 @@ int ArrayList<T>::indexOf(const T& item) {
  */
 template<class T>
 int ArrayList<T>::indexOf(const T& item, int i) {
-    /**
-     * @todo Return the index of the ith
-     * occurrence of object.
-     */
-    return -1;
+	int count = 0;
+	for (int j = 0; j < m_size; j++) {
+		if (pElements[j] == item) {
+			count += 1;
+			if (count == i) {
+				return j;
+			}
+		}
+	} return -1;
 }
 
 /**
@@ -301,10 +382,12 @@ int ArrayList<T>::indexOf(const T& item, int i) {
  */
 template<class T>
 int ArrayList<T>::lastIndexOf(const T& item) {
-    /**
-     * @todo Return the last index of item in the array.
-     */
-    return -1;
+	int index = -1;
+	for (int i = 0; i < m_size; i++) {
+		if (pElements[i] == item) {
+			index = i;
+		}
+	} return index;
 }
 
 /**
@@ -328,8 +411,9 @@ int ArrayList<T>::size() const {
  */
 template<class T>
 T& ArrayList<T>::get(int index) {
-    // TODO, error checking   
-    return pElements[index];
+    if (index > m_capacity || index < 0) {
+    	throw std::exception();
+    } return pElements[index];
 }
 
 /**
@@ -343,8 +427,9 @@ T& ArrayList<T>::get(int index) {
  */
 template<class T>
 T& ArrayList<T>::operator[](int index) {
-    // TODO, error checking
-    return pElements[index];
+    if (index > m_capacity || index < 0) {
+    	throw std::exception();
+    } return pElements[index];
 }
 
 /**
@@ -358,8 +443,9 @@ T& ArrayList<T>::operator[](int index) {
  */
 template<class T>
 const T& ArrayList<T>::operator[](int index) const {
-    // TODO, error checking
-    return pElements[index];
+    if (index > m_capacity || index < 0) {
+    	throw std::exception();
+    } return pElements[index];
 }
 
 /**
@@ -469,9 +555,8 @@ ArrayList<T>& ArrayList<T>::operator+=(const ArrayList<T> & other) {
  */
 template<class T>
 void ArrayList<T>::sort() {
-    /**
+   /**
      * @todo Sort the array in ascending order.
      */
 }
-
 #endif

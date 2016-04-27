@@ -193,7 +193,61 @@ bool DLList::removeLast(int & data) {
  *      returns: Sentinel<->5<->3<->Sentinel
  */
 DLList * DLList::difference(DLList& rhs) {
-    return nullptr;
+	//VVVVVVVVVVV Checks the current list with the rhs and sets matches to '-1'
+	DLNode *p = new DLNode;
+	p->next = head->next;
+
+	while (p->next != head) {
+		DLNode *e = new DLNode;
+		e->next = rhs.head->next;
+		while (e->next != rhs.head) {
+			if (p->next->data == e->next->data) {
+				p->next->data = -1;
+				break;
+			} e->next = e->next->next;
+		} delete e;
+		p->next = p->next->next;
+	}
+
+	//VVVVVVVVVVV Checks the current list for duplicates and sets them to '-1'
+	
+	p->next = head->next;
+	int src[head->data];
+	int count = 0;
+	while (p->next != head) {
+		if (p->next->data != -1) {
+			src[count++] = p->next->data;			
+		} p->next = p->next->next;
+	}
+
+	p->next = head->next;
+	while (p->next != head) {
+		count = 0;
+		for(int i = 0; i < head->data; i++) {
+			if(p->next->data == src[i]) {
+				if (count == 0) {
+					count += 1;
+				} else {
+					src[i] = p->next->data + 1;
+					p->next->data = -1;
+				}
+			}
+		} p->next = p->next->next;
+	}
+	
+	//VVVVVVVVVVVV Creates a new list and adds all non -1s. Returns list.
+	DLList *list = new DLList();	
+	DLNode *t = new DLNode;
+	t->prev = head->prev;
+	
+	while (t->prev != head) {
+			if (t->prev->data != -1) {
+				list->insertFront(t->prev->data);
+			} t->prev = t->prev->prev;
+	
+	} delete t;
+		
+	return list;
 }
 
 /**
@@ -219,7 +273,21 @@ DLList * DLList::difference(DLList& rhs) {
  *      sublist: Sentinel<->2<->7<->Sentinel
  */
 DLList * DLList::getRange(int start, int end) {
-    return nullptr;
+	DLList *list = new DLList();
+	DLNode *p = new DLNode;
+	p->prev = head->prev;
+	int count = head->data;
+
+	while(p->prev != head) {
+		if (count <= end+1 && count >= start+1) {
+			list->insertFront(p->prev->data);
+		}
+
+		count -= 1;
+		p->prev = p->prev->prev;
+	} delete p;
+
+    return list;
 }
 
 
@@ -244,7 +312,37 @@ DLList * DLList::getRange(int start, int end) {
  *      returns: Sentinel<->1<->2<->Sentinel
  */
 DLList * DLList::intersection(DLList& rhs) {
-    return nullptr;
+    DLNode *p = new DLNode;
+    p->next = head->next;
+
+    while (p->next != head) {
+    	bool match = false;
+    	DLNode *e = new DLNode;
+	e->next = rhs.head->next;
+	while(e->next != rhs.head) {
+		if (p->next->data == e->next->data) {
+			match = true;
+			break;
+		} e->next = e->next->next;
+	} delete e;
+
+	if (match == false) {
+		p->next->data = -1;
+	}
+	p->next = p->next->next;
+	match = false;
+	}
+
+    DLList *list = new DLList();
+    p->prev = head->prev;
+
+    while (p->prev != head) {
+    	if (p->prev->data != -1) {
+		list->insertFront(p->prev->data);
+	} p->prev = p->prev->prev;
+    } delete p;
+
+    return list;
 }
 
 /**
@@ -265,14 +363,36 @@ DLList * DLList::intersection(DLList& rhs) {
  *      list: Sentinel<->1<->2<->Sentinel
  */
 void DLList::removeRange(int start, int end) {
+	DLNode *p = new DLNode;
+	p->next = head->next;
+	int count = 0;
 
+	while(p->next != head) {
+		if (end >= count && count >= start) {
+			p->next->prev->next = p->next->next;
+			p->next->next->prev = p->next->prev;
+			delete p->next;
+		}
+		count += 1;
+		p->next = p->next->next;
+	}
 }
 
 int main() {
 	DLList *list = new DLList();
-	int value = 0;
-	if (list->removeLast(value) == false) {
-		printf("The list was empty.\n");
-	}
+	list->insertFront(3);
+	list->insertFront(7);
+	list->insertFront(2);
+	list->insertFront(1);
+
+	printf("\n");
+
+	list->print();
+
+	printf("\n");
+	
+	list->removeRange(1, 2);
+	list->print();
+
 	return 0;
 }
