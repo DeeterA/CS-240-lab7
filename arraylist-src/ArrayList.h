@@ -128,9 +128,9 @@ ArrayList<T>::ArrayList(const ArrayList<T>& other) {
  */
 template<class T>
 ArrayList<T>::~ArrayList() {
-    /**
-     * @todo Deallocate any memory or resources used in ArrayList
-     */
+    
+     // @TODO Deallocate any memory or resources used in ArrayList
+     
 }
 
 /**
@@ -464,7 +464,18 @@ const T& ArrayList<T>::operator[](int index) const {
  */
 template<class T>
 ArrayList<T> & ArrayList<T>::operator=(const ArrayList<T>& other) {
-    return *this;
+	delete this.m_size;
+	delete this.m_capacity;
+
+	this.m_size = other -> m_size;
+	this.m_capacity = other -> m_size;
+	
+	for(int i = 0; i < m_capacity; i++) {
+		delete *pElements[i];
+		*pElements[i] = other -> pElements[i];
+	}
+
+	return this;
 }
     
 /**
@@ -477,6 +488,14 @@ ArrayList<T> & ArrayList<T>::operator=(const ArrayList<T>& other) {
  */
 template<class T>
 bool ArrayList<T>::operator==(const ArrayList<T> & other) {
+	if (this.m_size != other->m_size)
+		return false;
+	
+	for (int i = 0; i < m_capacity; i++) {
+		if (this.pElements[i] != other -> pElements[i])
+			return false;
+	}
+	
     return true;
 }
 
@@ -491,6 +510,7 @@ bool ArrayList<T>::operator==(const ArrayList<T> & other) {
  */
 template<class T>
 ArrayList<T>& ArrayList<T>::operator<<(const T& item) {
+	this.add(item);
     return *this;
 }
 
@@ -506,9 +526,10 @@ ArrayList<T>& ArrayList<T>::operator<<(const T& item) {
  */
 template<class T>
 ArrayList<T>& ArrayList<T>::operator<<(const ArrayList<T> & other) {
-    /**
-     * @todo Append another ArrayList<T> to the end of this one.
-     */
+    
+    	for(int i = 0; i < other->m_capacity; i++) {
+		this.add(other->pElements[i]);
+	}
     return *this;
 }
 
@@ -523,9 +544,7 @@ ArrayList<T>& ArrayList<T>::operator<<(const ArrayList<T> & other) {
  */
 template<class T>
 ArrayList<T>& ArrayList<T>::operator+=(const T& item) {
-    /**
-     * @todo This should be the same as <<
-     */
+	this.add(item);
     return *this;
 }
 
@@ -540,9 +559,10 @@ ArrayList<T>& ArrayList<T>::operator+=(const T& item) {
  */
 template<class T>
 ArrayList<T>& ArrayList<T>::operator+=(const ArrayList<T> & other) {
-    /**
-     * @todo Analogously, this does the same as <<.
-     */
+
+	for(int i = 0; i < other->m_capacity; i++) {
+		this.add(other->pElements[i]);
+	}
     return *this;
 }
 
@@ -555,8 +575,20 @@ ArrayList<T>& ArrayList<T>::operator+=(const ArrayList<T> & other) {
  */
 template<class T>
 void ArrayList<T>::sort() {
-   /**
-     * @todo Sort the array in ascending order.
-     */
+	bool swapped = true;
+	int j = 0;
+	int temp;
+	while (swapped) {
+		swapped = false;
+		j++;
+		for(int i = 0; i < this.m_size-j; i++) {
+			if (this.pElements[i] > this.pElements[i+1]) {
+				temp = this.pElements[i];
+				this.pElements[i] = this.pElements[i+1];
+				this.pElements[i+1] = this.pElements[temp];
+				swapped = true;
+			}
+		}
+	}
 }
 #endif
